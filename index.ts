@@ -1,56 +1,48 @@
-const dragSources = document.getElementsByClassName("dragSources");
+const dragSources = document.getElementsByClassName(
+  "dragSources"
+) as HTMLCollectionOf<HTMLElement>;
+
 const dropTarget = document.getElementById("dropTarget");
 
-window.addEventListener("DOMContentLoaded", run);
+if (!dragSources || !dropTarget) {
+  throw new Error("No drag sources or drop target");
+}
 
-function handleDragStart(e: DragEvent) {
-  if (!e.dataTransfer) throw new Error("No data transfer");
-  if (!(e.target instanceof Element)) throw new Error("Invalid target");
+function handleDrag(e: DragEvent) {
+  if (!(e.target instanceof Element)) throw new Error("Invalid");
 
   e.target.classList.add("dragging");
 
-  //Set some data for current drag operation
-  e.dataTransfer.setData("text/plain", e.target.id);
+  e.dataTransfer?.setData("text/plain", e.target.id);
 
-  console.log("Dragged element's ID: ", e.dataTransfer.getData("text/plain"));
-
-  //Replace default drag preview with custom image
   let img = new Image();
   img.src = "preview.png";
-  e.dataTransfer.setDragImage(img, 10, 10);
-}
-
-function handleDragOver(e: DragEvent) {
-  //To treat this element as droppable
-  e.preventDefault();
-
-  if (!e.dataTransfer) throw new Error("No data transfer");
-
-  console.log("dragover");
+  e.dataTransfer?.setDragImage(img, 10, 10);
 }
 
 function handleDrop(e: DragEvent) {
   e.preventDefault();
 
-  if (!dropTarget) throw new Error("No drop target");
-  if (!e.dataTransfer) throw new Error("No data transfer");
+  const dragSourceId = e.dataTransfer?.getData("text/plain");
+  if (!dragSourceId) throw new Error("no id");
+  console.log(dragSourceId);
 
-  const dragSourceId = e.dataTransfer.getData("text/plain");
   const dragSource = document.getElementById(dragSourceId);
 
-  if (!dragSource) throw new Error("No drag source");
+  if (!dragSource) throw new Error("no drag source");
 
   dragSource.classList.remove("dragging");
-  dropTarget.appendChild(dragSource);
+  dropTarget?.appendChild(dragSource);
 }
 
-function run() {
-  if (!dragSources || !dropTarget) return;
+Array.from(dragSources).forEach((dragSource) => {
+  dragSource.addEventListener("dragstart", handleDrag);
+});
 
-  Array.from(dragSources).forEach((dragSource) => {
-    (dragSource as HTMLElement).addEventListener("dragstart", handleDragStart);
-  });
-
-  dropTarget.addEventListener("dragover", handleDragOver);
-  dropTarget.addEventListener("drop", handleDrop);
+function handleDragOver(e: DragEvent) {
+  e.preventDefault();
+  console.log("dragover");
 }
+
+dropTarget.addEventListener("dragover", handleDragOver);
+dropTarget.addEventListener("drop", handleDrop);
