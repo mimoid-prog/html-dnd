@@ -1,47 +1,38 @@
 "use strict";
 const dragSources = document.getElementsByClassName("dragSources");
 const dropTarget = document.getElementById("dropTarget");
-window.addEventListener("DOMContentLoaded", run);
-function handleDragStart(e) {
-    if (!e.dataTransfer)
-        throw new Error("No data transfer");
+if (!dragSources || !dropTarget) {
+    throw new Error("No drag sources or drop target");
+}
+function handleDrag(e) {
+    var _a, _b;
     if (!(e.target instanceof Element))
-        throw new Error("Invalid target");
+        throw new Error("Invalid");
     e.target.classList.add("dragging");
-    //Set some data for current drag operation
-    e.dataTransfer.setData("text/plain", e.target.id);
-    console.log("Dragged element's ID: ", e.dataTransfer.getData("text/plain"));
-    //Replace default drag preview with custom image
+    (_a = e.dataTransfer) === null || _a === void 0 ? void 0 : _a.setData("text/plain", e.target.id);
     let img = new Image();
     img.src = "preview.png";
-    e.dataTransfer.setDragImage(img, 10, 10);
-}
-function handleDragOver(e) {
-    //To treat this element as droppable
-    e.preventDefault();
-    if (!e.dataTransfer)
-        throw new Error("No data transfer");
-    console.log("dragover");
+    (_b = e.dataTransfer) === null || _b === void 0 ? void 0 : _b.setDragImage(img, 10, 10);
 }
 function handleDrop(e) {
+    var _a;
     e.preventDefault();
-    if (!dropTarget)
-        throw new Error("No drop target");
-    if (!e.dataTransfer)
-        throw new Error("No data transfer");
-    const dragSourceId = e.dataTransfer.getData("text/plain");
+    const dragSourceId = (_a = e.dataTransfer) === null || _a === void 0 ? void 0 : _a.getData("text/plain");
+    if (!dragSourceId)
+        throw new Error("no id");
+    console.log(dragSourceId);
     const dragSource = document.getElementById(dragSourceId);
     if (!dragSource)
-        throw new Error("No drag source");
+        throw new Error("no drag source");
     dragSource.classList.remove("dragging");
-    dropTarget.appendChild(dragSource);
+    dropTarget === null || dropTarget === void 0 ? void 0 : dropTarget.appendChild(dragSource);
 }
-function run() {
-    if (!dragSources || !dropTarget)
-        return;
-    Array.from(dragSources).forEach((dragSource) => {
-        dragSource.addEventListener("dragstart", handleDragStart);
-    });
-    dropTarget.addEventListener("dragover", handleDragOver);
-    dropTarget.addEventListener("drop", handleDrop);
+Array.from(dragSources).forEach((dragSource) => {
+    dragSource.addEventListener("dragstart", handleDrag);
+});
+function handleDragOver(e) {
+    e.preventDefault();
+    console.log("dragover");
 }
+dropTarget.addEventListener("dragover", handleDragOver);
+dropTarget.addEventListener("drop", handleDrop);
